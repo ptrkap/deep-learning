@@ -24,6 +24,13 @@ import java.util.List;
 public class FxPredictor {
 
     public static void main(String[] args) throws Exception {
+        SetupInitializer propertiesReader = new SetupInitializer();
+        Setup setup = propertiesReader.readProperties();
+        System.out.println("--------------------------------------------");
+        System.out.println("onlyRecentPrediction" + setup.isOnlyRecentPrediction());
+        System.out.println("interval.minutes" + setup.getIntervalInMinutes());
+        System.out.println("frame.days" + setup.getFrameInDays());
+        System.out.println("--------------------------------------------");
         String fileName = new ClassPathResource("dollar-euro.csv").getFile().getPath();
         DataSet dataSet = readCSVDataset(fileName);
         List<DataSet> dataSets = new ArrayList<>();
