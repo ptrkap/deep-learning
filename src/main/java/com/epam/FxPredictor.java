@@ -15,6 +15,7 @@ import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.dataset.DataSet;
 import org.nd4j.linalg.dataset.api.iterator.DataSetIterator;
 import javax.swing.*;
+import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -27,7 +28,9 @@ public class FxPredictor {
         DataSet dataSet = readCSVDataset(fileName);
         List<DataSet> dataSets = new ArrayList<>();
         dataSets.add(dataSet);
-        plotDatasets(dataSets, "Training data - FX: USD/EUR");
+        String prediction = "USD/EURO tomorrow: 0.8832 (+0.5%)"; // tmp
+        boolean growth = true; // tmp
+        plotDataSets(dataSets, "Training data - FX: USD/EUR", prediction, growth);
     }
 
     private static DataSet readCSVDataset(String filename) throws IOException, InterruptedException {
@@ -42,29 +45,33 @@ public class FxPredictor {
         return dataSetIterator.next();
     }
 
-    private static void plotDatasets(List<DataSet> DataSets, String title){
+    private static void plotDataSets(List<DataSet> DataSets, String title, String prediction, boolean growth){
         XYSeriesCollection collection = new XYSeriesCollection();
         for (DataSet dataSet : DataSets) {
             INDArray features = dataSet.getFeatures();
             INDArray outputs= dataSet.getLabels();
-            int nRows = features.rows();
+            int rowsNumber = features.rows();
             XYSeries series = new XYSeries("S" + 1);
-            for (int i = 0; i < nRows; i++){
+            for (int i = 0; i < rowsNumber; i++){
                 series.add(features.getDouble(i), outputs.getDouble(i));
             }
             collection.addSeries(series);
         }
-        PlotOrientation orientation = PlotOrientation.VERTICAL;
         JFreeChart chart = ChartFactory.createScatterPlot(
-                title ,
+                " " ,
                 "Time [days]",
                 "USD/EUR",
                 collection,
-                orientation,
+                PlotOrientation.VERTICAL,
                 false,
                 false,
                 false);
         JPanel panel = new ChartPanel(chart);
+        JLabel label = new JLabel(prediction);
+        label.setFont(new Font("Arial", Font.PLAIN, 18));
+        Color color = growth ? Color.GREEN : Color.RED;
+        label.setForeground(color);
+        panel.add(label);
         JFrame frame = new JFrame();
         frame.add(panel);
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
