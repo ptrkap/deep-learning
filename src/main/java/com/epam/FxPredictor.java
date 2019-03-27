@@ -26,7 +26,6 @@ import org.nd4j.linalg.dataset.api.preprocessor.NormalizerMinMaxScaler;
 import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.learning.config.Nesterovs;
 import org.nd4j.linalg.lossfunctions.LossFunctions;
-
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
@@ -128,12 +127,16 @@ public class FxPredictor {
                 .weightInit(WeightInit.XAVIER)
                 .updater(new Nesterovs(learningRate, 0.9))
                 .list()
-                .layer(0, new DenseLayer.Builder().nIn(inputsNumber).nOut(outputsNumber)
+                .layer(0, new DenseLayer.Builder()
                         .activation(Activation.IDENTITY)
+                        .nIn(inputsNumber)
+                        .nOut(outputsNumber)
                         .build())
                 .layer(1, new OutputLayer.Builder(LossFunctions.LossFunction.MSE)
                         .activation(Activation.IDENTITY)
-                        .nIn(outputsNumber).nOut(outputsNumber).build())
+                        .nIn(inputsNumber)
+                        .nOut(outputsNumber)
+                        .build())
                 .build();
 
         MultiLayerNetwork multiLayerNetwork = new MultiLayerNetwork(multiLayerConfiguration);
