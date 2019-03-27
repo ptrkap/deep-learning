@@ -39,54 +39,42 @@
         <exec-maven-plugin.version>1.4.0</exec-maven-plugin.version>
         <maven.minimum.version>3.3.1</maven.minimum.version>
         <javafx.version>2.2.3</javafx.version>
-        <!--<javafx.runtime.lib.jar>${env.JAVAFX_HOME}/jfxrt.jar</javafx.runtime.lib.jar>-->
         <aws.sdk.version>1.11.109</aws.sdk.version>
         <jackson.version>2.5.1</jackson.version>
         <scala.plugin.version>3.2.2</scala.plugin.version>
     </properties>
 
     <dependencies>
-        <!-- ND4J backend. You need one in every DL4J project. Normally define artifactId as either "nd4j-native-platform" or "nd4j-cuda-9.2-platform" -->
         <dependency>
             <groupId>org.nd4j</groupId>
             <artifactId>${nd4j.backend}</artifactId>
             <version>${nd4j.version}</version>
         </dependency>
-
-        <!-- Core DL4J functionality -->
         <dependency>
             <groupId>org.deeplearning4j</groupId>
             <artifactId>deeplearning4j-core</artifactId>
             <version>${dl4j.version}</version>
         </dependency>
-
         <dependency>
             <groupId>org.deeplearning4j</groupId>
             <artifactId>deeplearning4j-nlp</artifactId>
             <version>${dl4j.version}</version>
         </dependency>
-
         <dependency>
             <groupId>org.deeplearning4j</groupId>
             <artifactId>deeplearning4j-zoo</artifactId>
             <version>${dl4j.version}</version>
         </dependency>
-
-        <!-- deeplearning4j-ui is used for visualization: see http://deeplearning4j.org/visualization -->
         <dependency>
             <groupId>org.deeplearning4j</groupId>
             <artifactId>deeplearning4j-ui_${scala.binary.version}</artifactId>
             <version>${dl4j.version}</version>
         </dependency>
-
-        <!-- ParallelWrapper & ParallelInference live here -->
         <dependency>
             <groupId>org.deeplearning4j</groupId>
             <artifactId>deeplearning4j-parallel-wrapper</artifactId>
             <version>${dl4j.version}</version>
         </dependency>
-
-        <!-- Next 2: used for MapFileConversion Example. Note you need *both* together -->
         <dependency>
             <groupId>org.datavec</groupId>
             <artifactId>datavec-hadoop</artifactId>
@@ -111,9 +99,6 @@
                 </exclusion>
             </exclusions>
         </dependency>
-
-
-        <!-- Arbiter - used for hyperparameter optimization (grid/random search) -->
         <dependency>
             <groupId>org.deeplearning4j</groupId>
             <artifactId>arbiter-deeplearning4j</artifactId>
@@ -124,15 +109,11 @@
             <artifactId>arbiter-ui_${scala.binary.version}</artifactId>
             <version>${arbiter.version}</version>
         </dependency>
-
-        <!-- datavec-data-codec: used only in video example for loading video data -->
         <dependency>
             <artifactId>datavec-data-codec</artifactId>
             <groupId>org.datavec</groupId>
             <version>${datavec.version}</version>
         </dependency>
-
-        <!-- Used in the feedforward/classification/MLP* and feedforward/regression/RegressionMathFunctions example -->
         <dependency>
             <groupId>jfree</groupId>
             <artifactId>jfreechart</artifactId>
@@ -143,20 +124,48 @@
             <artifactId>jcommon</artifactId>
             <version>${jcommon.version}</version>
         </dependency>
-
-        <!-- Used for downloading data in some of the examples -->
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
             <version>4.3.5</version>
         </dependency>
-
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
             <version>${logback.version}</version>
         </dependency>
-
     </dependencies>
-
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <mainClass>com.epam.FxPredictor</mainClass>
+                        </manifest>
+                    </archive>
+                    <descriptorRefs>
+                        <descriptorRef>jar-with-dependencies</descriptorRef>
+                    </descriptorRefs>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>make-assembly</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 </project>
