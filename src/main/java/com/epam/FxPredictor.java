@@ -28,9 +28,11 @@ public class FxPredictor {
         DataSet dataSet = readCSVDataset(fileName);
         List<DataSet> dataSets = new ArrayList<>();
         dataSets.add(dataSet);
-        String prediction = "USD/EURO tomorrow: 0.8832 (+0.5%)"; // tmp
+        String rate = "0.8832";
+        String percent = "+0.5%";
+        String prediction = String.format("USD/EURO tomorrow: %s [%s]", rate, percent);
         boolean growth = true; // tmp
-        plotDataSets(dataSets, "Training data - FX: USD/EUR", prediction, growth);
+        plotDataSets(dataSets, "FX: USD/EUR", prediction, growth);
     }
 
     private static DataSet readCSVDataset(String filename) throws IOException, InterruptedException {
@@ -69,7 +71,7 @@ public class FxPredictor {
         JPanel panel = new ChartPanel(chart);
         JLabel label = new JLabel(prediction);
         label.setFont(new Font("Arial", Font.PLAIN, 18));
-        Color color = growth ? Color.GREEN : Color.RED;
+        Color color = growth ? new Color(0, 190, 0) : new Color(230, 0,0);
         label.setForeground(color);
         panel.add(label);
         JFrame frame = new JFrame();
