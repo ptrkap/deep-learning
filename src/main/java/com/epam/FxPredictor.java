@@ -5,15 +5,28 @@ import org.datavec.api.records.reader.impl.csv.CSVRecordReader;
 import org.datavec.api.split.FileSplit;
 import org.datavec.api.util.ClassPathResource;
 import org.deeplearning4j.datasets.datavec.RecordReaderDataSetIterator;
+import org.deeplearning4j.nn.conf.MultiLayerConfiguration;
+import org.deeplearning4j.nn.conf.NeuralNetConfiguration;
+import org.deeplearning4j.nn.conf.layers.DenseLayer;
+import org.deeplearning4j.nn.conf.layers.OutputLayer;
+import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
+import org.deeplearning4j.nn.weights.WeightInit;
+import org.deeplearning4j.optimize.listeners.ScoreIterationListener;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
+import org.nd4j.linalg.activations.Activation;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.dataset.DataSet;
 import org.nd4j.linalg.dataset.api.iterator.DataSetIterator;
+import org.nd4j.linalg.dataset.api.preprocessor.NormalizerMinMaxScaler;
+import org.nd4j.linalg.factory.Nd4j;
+import org.nd4j.linalg.learning.config.Nesterovs;
+import org.nd4j.linalg.lossfunctions.LossFunctions;
+
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
@@ -35,6 +48,20 @@ public class FxPredictor {
         DataSet dataSet = readCSVDataset(fileName);
         List<DataSet> dataSets = new ArrayList<>();
         dataSets.add(dataSet);
+
+        MultiLayerNetwork multiLayerNetwork = createMultiLayerNetwork(dataSet);
+        NormalizerMinMaxScaler normalizerMinMaxScaler = new NormalizerMinMaxScaler();
+        normalizerMinMaxScaler.fit(dataSet);
+        int samplesNumber = 721;
+        INDArray x = Nd4j
+                .linspace(
+                    normalizerMinMaxScaler.getMin().getInt(0),
+                    normalizerMinMaxScaler.getMax().getInt(0),
+                    samplesNumber)
+                .reshape(samplesNumber, 1);
+        INDArray y = multiLayerNetwork.output(x);
+        dataSets.add(new DataSet(x, y));
+
         String rate = "0.8832";
         String percent = "+0.5%";
         String prediction = String.format("USD/EURO tomorrow: %s [%s]", rate, percent);
@@ -87,5 +114,36 @@ public class FxPredictor {
         frame.pack();
         frame.setTitle(title);
         frame.setVisible(true);
+    }
+
+    private static MultiLayerNetwork createMultiLayerNetwork(DataSet dataSet){
+        int seed = 12345;
+        int EpochsNumber = 200;
+        double learningRate = 0.00001;
+        int inputsNumber = 1;
+        int outputsNumber = 1;
+
+        MultiLayerConfiguration multiLayerConfiguration = new  NeuralNetConfiguration.Builder()
+                .seed(seed)
+                .weightInit(WeightInit.XAVIER)
+                .updater(new Nesterovs(learningRate, 0.9))
+                .list()
+                .layer(0, new DenseLayer.Builder().nIn(inputsNumber).nOut(outputsNumber)
+                        .activation(Activation.IDENTITY)
+                        .build())
+                .layer(1, new OutputLayer.Builder(LossFunctions.LossFunction.MSE)
+                        .activation(Activation.IDENTITY)
+                        .nIn(outputsNumber).nOut(outputsNumber).build())
+                .build();
+
+        MultiLayerNetwork multiLayerNetwork = new MultiLayerNetwork(multiLayerConfiguration);
+        multiLayerNetwork.init();
+        multiLayerNetwork.setListeners(new ScoreIterationListener(1));
+
+        for (int i = 0; i < EpochsNumber; i++){
+            multiLayerNetwork.fit(dataSet);
+        }
+
+        return multiLayerNetwork;
     }
 }

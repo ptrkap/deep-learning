@@ -60,7 +60,19 @@ public class CSVPlotter {
         DataSet modeloutput = new DataSet(x,y);
         DataSetList.add(modeloutput);
 
-    	plotDataset(DataSetList);    //Plot data and model fit.
+
+        // linear function
+		float x1 = x.getFloat(0);
+        float y1 = y.getFloat(0);
+		float x2 = x.getFloat(49);
+		float y2 = y.getFloat(49);
+
+		float a = (y2-y1) / (x2 - x1);
+		float b = y1 - a*x1;
+
+		float y_predicted = a*x2 + b;
+
+		plotDataset(DataSetList);    //Plot data and model fit.
     }
 
 	/**
